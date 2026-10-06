@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后室-论坛</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d4ed8'/%3E%3Crect x='9' y='6' width='14' height='20' rx='2' fill='white'/%3E%3Ccircle cx='20' cy='16' r='1.6' fill='%231d4ed8'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --primary:#1d4ed8;
+    --primary-dark:#1e3a8a;
+    --primary-light:#3b82f6;
+    --nav-bg:linear-gradient(90deg,#1e3a8a,#1d4ed8 55%,#2563eb);
+    --bg:#f4f7fc;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'PingFang SC','Microsoft YaHei','Segoe UI',system-ui,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh;
+    display:flex;flex-direction:column;padding-top:64px;
+  }
+  a{text-decoration:none;color:inherit}
+
+  /* ===== 顶部蓝色导航栏 ===== */
+  .navbar{
+    position:fixed;top:0;left:0;right:0;height:64px;z-index:100;
+    background:var(--nav-bg);box-shadow:0 2px 12px rgba(30,58,138,.25);
+  }
+  .nav-inner{
+    max-width:1080px;height:100%;margin:0 auto;padding:0 24px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:900;font-size:20px;letter-spacing:.5px;min-height:44px}
+  .brand .logo{
+    width:34px;height:34px;border-radius:8px;flex:none;
+    background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand .logo svg{width:20px;height:20px}
+  .nav-links{display:flex;align-items:center;gap:6px;list-style:none}
+  .nav-links a{
+    display:block;padding:9px 18px;border-radius:8px;color:rgba(255,255,255,.88);
+    font-size:15px;font-weight:500;transition:background .2s,color .2s;
+  }
+  .nav-links a:hover{background:rgba(255,255,255,.14);color:#fff}
+  .nav-links a.active{background:#fff;color:var(--primary-dark);font-weight:700}
+  .hamburger{
+    display:none;width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;
+    background:rgba(255,255,255,.12);flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  }
+  .hamburger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px;transition:transform .25s,opacity .25s}
+  .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .hamburger.open span:nth-child(2){opacity:0}
+  .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+  /* ===== 主区域 ===== */
+  main{flex:1}
+  .container{max-width:1080px;margin:0 auto;padding:0 24px}
+  .view{display:none;animation:fade .35s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ===== 主页 ===== */
+  .hero{
+    position:relative;overflow:hidden;text-align:center;
+    padding:72px 24px 64px;color:#fff;
+    background:linear-gradient(160deg,#1e3a8a 0%,#1d4ed8 55%,#3b82f6 100%);
+  }
+  .hero::before,.hero::after{
+    content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.08);
+  }
+  .hero::before{width:360px;height:360px;top:-140px;right:-90px}
+  .hero::after{width:260px;height:260px;bottom:-120px;left:-60px;background:rgba(255,255,255,.06)}
+  .hero .inner{position:relative;z-index:1;max-width:760px;margin:0 auto}
+  .hero .badge{
+    display:inline-block;padding:6px 14px;border-radius:999px;font-size:14px;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);margin-bottom:20px;
+  }
+  .hero h1{font-size:42px;font-weight:900;line-height:1.25;margin-bottom:16px}
+  .hero p{font-size:17px;line-height:1.8;color:rgba(255,255,255,.88);margin-bottom:32px}
+  .hero .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:10px;
+    font-size:15px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:#fff;color:var(--primary-dark);box-shadow:0 6px 18px rgba(0,0,0,.15)}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.45)}
+  .btn-ghost:hover{background:rgba(255,255,255,.2)}
+
+  .features{padding:56px 0 64px}
+  .features h2{text-align:center;font-size:26px;font-weight:900;margin-bottom:8px}
+  .features .sub{text-align:center;color:var(--muted);margin-bottom:36px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:28px 24px;box-shadow:0 2px 10px rgba(15,23,42,.04);transition:transform .25s,box-shadow .25s;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 10px 26px rgba(30,64,175,.12);border-color:#bfdbfe}
+  .card .icon{
+    width:46px;height:46px;border-radius:12px;margin-bottom:16px;
+    background:#e0edff;color:var(--primary);display:flex;align-items:center;justify-content:center;
+  }
+  .card .icon svg{width:24px;height:24px}
+  .card h3{font-size:17px;font-weight:700;margin-bottom:8px}
+  .card p{font-size:14px;line-height:1.75;color:var(--muted)}
+
+  /* ===== 站内搜索 ===== */
+  .search-page{padding:56px 0 64px}
+  .result-grammar{
+    margin-top:10px;padding:6px 18px;border:1px solid var(--primary-light);border-radius:999px;
+    background:#fff;color:var(--primary);font-size:13px;font-weight:800;cursor:pointer;
+    font-family:inherit;letter-spacing:1px;transition:all .2s;
+  }
+  .result-grammar:hover{background:var(--primary);color:#fff}
+  .code-entry{margin-top:14px;padding-top:14px;border-top:1px dashed #e2e8f0}
+  #codeInput{
+    width:100%;min-height:96px;padding:12px;border:1px solid #cbd5e1;border-radius:10px;
+    font-family:"Consolas","Courier New",monospace;font-size:13px;line-height:1.8;resize:vertical;
+    outline:none;box-sizing:border-box;transition:border-color .2s,box-shadow .2s;
+  }
+  #codeInput:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .code-submit{
+    margin-top:10px;padding:8px 24px;border:none;border-radius:10px;background:var(--primary);
+    color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;
+  }
+  .code-submit:hover{background:var(--primary-dark)}
+  .grammar-box{max-width:430px;text-align:left}
+  .grammar-box h3{text-align:center}
+  .grammar-list{max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:6px 4px;margin-bottom:20px}
+  .g-row{display:flex;align-items:center;gap:16px;padding:9px 14px;border-bottom:1px dashed #eef2f7}
+  .g-row:last-child{border-bottom:none}
+  .g-sym{
+    flex:none;min-width:54px;font-family:"Consolas","Courier New",monospace;
+    font-size:15px;font-weight:800;color:var(--primary);text-align:center;
+  }
+  .g-desc{font-size:14px;color:var(--text);line-height:1.6}
+  .search-box{
+    max-width:640px;margin:0 auto 44px;text-align:center;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:36px 32px;
+    box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .search-box h2{font-size:24px;font-weight:900;margin-bottom:8px}
+  .search-box p{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .search-form{display:flex;gap:10px}
+  .search-form input{
+    flex:1;height:48px;padding:0 16px;border:1px solid #cbd5e1;border-radius:10px;
+    font-size:16px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .search-form input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+  .search-form button{
+    height:48px;padding:0 26px;border:none;border-radius:10px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;font-family:inherit;
+    transition:background .2s;
+  }
+  .search-form button:hover{background:var(--primary-dark)}
+  .search-tips{margin-top:14px;font-size:14px;color:var(--muted)}
+  .search-tips button{
+    border:none;background:none;color:var(--primary);cursor:pointer;font-size:14px;font-family:inherit;
+    padding:0 10px;min-height:44px;border-radius:4px;display:inline-flex;align-items:center;
+  }
+  .search-tips button:hover{text-decoration:underline}
+
+  .results{max-width:640px;margin:0 auto}
+  .results .count{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .result-item{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:20px 22px;margin-bottom:12px;transition:border-color .2s,box-shadow .2s;
+  }
+  .result-item:hover{border-color:#bfdbfe;box-shadow:0 6px 16px rgba(30,64,175,.08)}
+  .result-item h3{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--primary-dark)}
+  .result-item p{font-size:14px;color:var(--muted);line-height:1.7}
+  .result-item mark{background:#fef08a;color:inherit;border-radius:3px;padding:0 2px}
+  .empty{text-align:center;padding:48px 20px;color:var(--muted)}
+  .empty .icon{width:56px;height:56px;border-radius:50%;background:#e5e7eb;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#9ca3af}
+  .empty .icon svg{width:28px;height:28px}
+
+  /* ===== 后室热点 ===== */
+  .hot-panel{
+    max-width:640px;margin:0 auto 44px;background:var(--card);
+    border:1px solid var(--line);border-radius:16px;padding:24px 26px;
+    box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .hot-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .hot-head .flame{
+    width:30px;height:30px;border-radius:8px;background:#fee2e2;color:#ef4444;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .hot-head .flame svg{width:16px;height:16px}
+  .hot-head h3{font-size:18px;font-weight:900}
+  .hot-sub{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .hot-item{
+    display:flex;align-items:center;gap:12px;padding:13px 10px;border-radius:10px;
+    cursor:pointer;transition:background .2s;
+  }
+  .hot-item:hover{background:#f0f5ff}
+  .hot-item + .hot-item{border-top:1px dashed var(--line)}
+  .hot-rank{font-size:14px;font-weight:900;color:#94a3b8;flex:none;width:24px;text-align:center}
+  .hot-item:nth-child(-n+3) .hot-rank{color:var(--primary-light)}
+  .hot-title{flex:1;font-size:15px;font-weight:500;line-height:1.6}
+  .hot-views{color:#9ca3af;font-size:14px;flex:none;margin-left:8px}
+  .hot-tag{
+    display:inline-block;border:1.5px solid #ef4444;color:#ef4444;font-size:13px;font-weight:700;
+    padding:0 5px;border-radius:3px;line-height:1.7;margin-left:8px;flex:none;
+  }
+  .hot-arrow{color:#cbd5e1;font-size:14px;flex:none;transition:transform .2s}
+  .hot-item:hover .hot-arrow{transform:translateX(3px);color:var(--primary)}
+
+  /* ===== 文章详情页 ===== */
+  .article-page{padding:40px 24px 64px;max-width:760px;margin:0 auto}
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;
+    cursor:pointer;margin-bottom:18px;padding:6px 10px;min-height:44px;border-radius:8px;transition:background .2s,color .2s;
+  }
+  .back-link:hover{background:#eef2ff;color:var(--primary-dark)}
+  .article-card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:36px 38px;box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .article-title{font-size:24px;font-weight:900;line-height:1.4;margin-bottom:14px;color:var(--primary-dark)}
+  .article-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--muted);padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:20px}
+  .article-body{font-size:15px;line-height:2;text-align:justify;color:#374151}
+  .article-body p{margin-bottom:14px}
+
+  /* ===== 讨论区 ===== */
+  .discuss{margin-top:36px}
+  .cipher{
+    font-family:"Consolas","Courier New",monospace;white-space:pre-wrap;
+    color:#334155;line-height:2;letter-spacing:1px;
+  }
+  .discuss-head{display:flex;align-items:baseline;gap:10px;margin-bottom:18px}
+  .discuss-head h3{font-size:18px;font-weight:900}
+  .discuss-head span{font-size:14px;color:var(--muted)}
+  .comment-item{
+    background:#f8fafc;border:1px solid var(--line);border-radius:12px;
+    padding:12px 18px;margin-bottom:10px;
+  }
+  .comment-item p{font-size:14px;line-height:1.8;color:#374151}
+  .comment-item .name{font-weight:700;color:var(--primary-dark)}
+  .comment-form{margin-top:18px;background:var(--card);border:1px dashed #cbd5e1;border-radius:12px;padding:18px}
+  .comment-form input{
+    width:100%;height:42px;padding:0 14px;border:1px solid #cbd5e1;border-radius:8px;
+    font-size:16px;font-family:inherit;outline:none;margin-bottom:10px;transition:border-color .2s,box-shadow .2s;
+  }
+  .comment-form textarea{
+    width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;
+    font-size:16px;font-family:inherit;outline:none;resize:vertical;min-height:64px;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .comment-form input:focus,.comment-form textarea:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .comment-form .form-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+  .comment-form .hint{font-size:14px;color:var(--muted)}
+  .comment-form button{
+    height:44px;padding:0 24px;border:none;border-radius:8px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:14px;font-weight:700;font-family:inherit;transition:background .2s;
+  }
+  .comment-form button:hover{background:var(--primary-dark)}
+  .result-item{cursor:pointer}
+  .result-item .go-hint{font-size:12px;color:var(--primary);margin-top:6px;font-weight:500}
+
+  /* ===== 轻提示 ===== */
+  .toast{
+    position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);
+    background:#111827;color:#fff;font-size:14px;padding:10px 20px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ===== 问题反馈 ===== */
+  .feedback-page{padding:56px 0 64px}
+  .feedback-card{
+    max-width:640px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:36px 34px;box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .feedback-card h2{font-size:24px;font-weight:900;margin-bottom:8px;text-align:center}
+  .feedback-card .sub{color:var(--muted);font-size:14px;text-align:center;margin-bottom:28px}
+  .fb-label{display:block;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
+  .fb-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+  .fb-opt{
+    padding:9px 18px;border:1.5px solid #cbd5e1;border-radius:999px;cursor:pointer;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--muted);transition:all .2s;
+  }
+  .fb-opt:hover{border-color:var(--primary-light);color:var(--primary)}
+  .fb-opt.active{border-color:var(--primary);background:#eef4ff;color:var(--primary-dark);font-weight:700}
+  .fb-field{margin-bottom:18px}
+  .fb-field label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
+  .fb-field .tip{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
+  .fb-field input{
+    width:100%;height:46px;padding:0 14px;border:1px solid #cbd5e1;border-radius:10px;
+    font-size:16px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .fb-field input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .fb-btn-row{margin-top:8px}
+  .fb-btn{
+    width:100%;height:48px;border:none;border-radius:10px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;font-family:inherit;transition:background .2s;
+  }
+  .fb-btn:hover{background:var(--primary-dark)}
+
+  /* ===== 登录或建立帐号 ===== */
+  .login-page{padding:56px 0 64px}
+  .login-card{
+    max-width:560px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:36px 34px;box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .login-card h2{font-size:24px;font-weight:900;margin-bottom:8px;text-align:center}
+  .login-card .sub{color:var(--muted);font-size:14px;text-align:center;margin-bottom:28px}
+  .login-field{margin-bottom:18px}
+  .login-field label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
+  .login-field input{
+    width:100%;height:46px;padding:0 14px;border:1px solid #cbd5e1;border-radius:10px;
+    font-size:16px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .login-field input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .cap-row{display:flex;gap:10px;align-items:center}
+  .cap-question{
+    flex:none;min-width:130px;height:46px;display:flex;align-items:center;justify-content:center;
+    background:#eef2f9;border:1px dashed #b9c6dd;border-radius:10px;
+    font-size:18px;font-weight:800;color:var(--primary-dark);letter-spacing:2px;
+  }
+  .cap-row input{flex:1;min-width:0}
+  .cap-refresh{
+    flex:none;height:46px;padding:0 16px;border:1px solid #cbd5e1;border-radius:10px;
+    background:#fff;color:var(--muted);font-size:14px;font-family:inherit;cursor:pointer;transition:all .2s;
+  }
+  .cap-refresh:hover{border-color:var(--primary-light);color:var(--primary)}
+  .login-btn-row{margin-top:8px}
+  .login-btn{
+    width:100%;height:48px;border:none;border-radius:10px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;font-family:inherit;transition:background .2s,opacity .2s;
+  }
+  .login-btn:hover:not(:disabled){background:var(--primary-dark)}
+  .login-btn:disabled{background:#cbd5e1;color:#f1f5f9;cursor:not-allowed}
+
+  /* ===== 登录提示弹窗 ===== */
+  .modal-mask{
+    position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-mask.show{display:flex}
+  .modal-box{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:32px 36px;max-width:380px;width:100%;text-align:center;
+    box-shadow:0 20px 50px rgba(15,23,42,.3);
+  }
+  .modal-box h3{font-size:18px;font-weight:900;margin-bottom:12px;color:var(--text)}
+  .modal-box p{font-size:15px;line-height:1.8;color:var(--muted);margin-bottom:24px}
+  .modal-btn{
+    padding:11px 46px;border:none;border-radius:10px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;font-family:inherit;transition:background .2s;
+  }
+  .modal-btn:hover{background:var(--primary-dark)}
+
+  /* ===== 登录后空白页 ===== */
+  .blank-page{padding:80px 0 120px}
+  .blank-inner{display:flex;align-items:center;justify-content:center;min-height:52vh}
+  .friend-btn{
+    padding:15px 56px;font-size:17px;font-weight:800;color:#fff;letter-spacing:2px;
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);border:none;border-radius:12px;
+    cursor:pointer;font-family:inherit;transition:filter .2s,transform .2s;
+  }
+  .friend-btn:hover{filter:brightness(1.08);transform:translateY(-2px)}
+
+  /* ===== 好友列表弹窗 ===== */
+  .modal-btn.ghost{background:#fff;color:var(--muted);border:1px solid #cbd5e1}
+  .modal-btn.ghost:hover{background:#f1f5f9}
+  .friend-box{max-width:400px}
+  .friend-item{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:15px 18px;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;
+    cursor:pointer;transition:all .2s;text-align:left;
+  }
+  .friend-item:hover{border-color:var(--primary-light);background:#f4f8ff;transform:translateY(-1px)}
+  .fi-name{font-size:16px;font-weight:800;color:var(--text)}
+  .fi-tag{font-size:12px;color:var(--muted);background:#eef2f9;border-radius:999px;padding:3px 10px}
+  .gm-sub{color:var(--muted);font-size:14px;margin-bottom:14px}
+  #groupPass{
+    width:100%;height:46px;padding:0 14px;border:1px solid #cbd5e1;border-radius:10px;
+    font-size:16px;font-family:inherit;outline:none;margin-bottom:20px;box-sizing:border-box;
+  }
+  #groupPass:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .gm-row{display:flex;gap:10px;justify-content:center}
+
+  /* ===== 聊天页 ===== */
+  .chat-page{max-width:680px;margin:0 auto;padding:28px 0 44px}
+  .chat-head{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+  .chat-head h3{font-size:18px;font-weight:900;color:var(--text)}
+  .chat-box{
+    height:440px;overflow-y:auto;background:#fff;border:1px solid var(--line);
+    border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;
+  }
+  .msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.7;word-break:break-word}
+  .msg.them{align-self:flex-start;background:#eef2f9;color:#26344a;border-bottom-left-radius:4px}
+  .msg.me{align-self:flex-end;background:#1d4ed8;color:#fff;border-bottom-right-radius:4px}
+  .msg .mu{font-size:12px;opacity:.75;display:block;margin-bottom:2px}
+  .chat-input-row{display:flex;gap:10px;margin-top:14px}
+  .chat-input-row input{
+    flex:1;min-width:0;height:46px;padding:0 14px;border:1px solid #cbd5e1;border-radius:10px;
+    font-size:16px;font-family:inherit;outline:none;
+  }
+  .chat-input-row input:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  .chat-input-row button{
+    flex:none;padding:0 28px;height:46px;border:none;border-radius:10px;cursor:pointer;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;font-family:inherit;transition:background .2s;
+  }
+  .chat-input-row button:hover{background:var(--primary-dark)}
+  .feedback-entry{
+    max-width:900px;margin:24px auto 0;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+    box-shadow:0 2px 10px rgba(15,23,42,.04);flex-wrap:wrap;
+  }
+  .feedback-entry h3{font-size:16px;font-weight:700;margin-bottom:4px}
+  .feedback-entry p{font-size:13px;color:var(--muted)}
+
+  /* ===== 全红页面 ===== */
+  .view-red{
+    position:fixed;inset:0;z-index:200;background:#d70000;cursor:pointer;
+    animation:redShake .15s linear infinite;
+  }
+  @keyframes redShake{
+    0%,100%{transform:translate(0,0)}
+    25%{transform:translate(-2px,1px)}
+    50%{transform:translate(2px,-1px)}
+    75%{transform:translate(-1px,-2px)}
+  }
+  .view-red.active{display:flex;align-items:center;justify-content:center}
+  .red-tip{
+    position:absolute;bottom:28px;left:0;right:0;text-align:center;
+    color:rgba(255,255,255,.75);font-size:14px;letter-spacing:1px;
+  }
+  .red-uec{
+    position:absolute;right:20px;bottom:24px;color:rgba(255,255,255,.85);
+    font-size:14px;font-weight:700;letter-spacing:1px;z-index:2;
+  }
+  .red-why{
+    position:absolute;color:#ffffff;font-weight:800;white-space:nowrap;
+    -webkit-text-stroke:1.2px #000;
+    text-shadow:2px 2px 0 #000;
+    pointer-events:none;user-select:none;z-index:1;
+  }
+
+  /* ===== 为什么模式 ===== */
+  html.why-mode, body.why-mode{background:#d70000 !important}
+  body.why-mode *{
+    background:#d70000 !important;
+    color:#ffffff !important;
+    border-color:#a30000 !important;
+    box-shadow:none !important;
+    animation:whyJitter .12s linear infinite !important;
+  }
+  @keyframes whyJitter{
+    0%{transform:translate(0,0) rotate(0)}
+    10%{transform:translate(-2px,1px) rotate(-.5deg)}
+    20%{transform:translate(2px,-2px) rotate(.5deg)}
+    30%{transform:translate(-1px,-1px) rotate(-.3deg)}
+    40%{transform:translate(1px,2px) rotate(.4deg)}
+    50%{transform:translate(-2px,0) rotate(-.6deg)}
+    60%{transform:translate(2px,1px) rotate(.5deg)}
+    70%{transform:translate(-1px,2px) rotate(-.4deg)}
+    80%{transform:translate(1px,-1px) rotate(.3deg)}
+    90%{transform:translate(-2px,-2px) rotate(-.5deg)}
+    100%{transform:translate(0,0) rotate(0)}
+  }
+
+  /* ===== 为什么大按钮 ===== */
+  .why-big-btn{
+    display:inline-block;margin-top:30px;padding:18px 60px;font-size:40px;font-weight:900;
+    background:transparent;border:3px solid #ffffff;border-radius:16px;color:#ffffff;cursor:pointer;
+    font-family:inherit;letter-spacing:8px;
+  }
+  body.why-mode .why-big-btn{border-color:#ffffff !important;background:#a30000 !important}
+
+  /* ===== 结局一 ===== */
+  .ending-page{min-height:100vh;align-items:center;justify-content:center;padding:40px 20px}
+  .view.ending-page.active{display:flex}
+  .ending-card{
+    max-width:560px;width:100%;background:var(--card);border:1px solid var(--line);
+    border-radius:18px;padding:52px 44px;text-align:center;box-shadow:0 8px 30px rgba(15,23,42,.08);
+  }
+  .ending-tag{
+    display:inline-block;padding:4px 14px;border:1.5px solid var(--primary);border-radius:999px;
+    color:var(--primary);font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:20px;
+  }
+  .ending-card h2{font-size:40px;font-weight:900;color:var(--primary-dark);margin-bottom:18px;letter-spacing:8px}
+  .ending-card p{font-size:17px;line-height:2;color:var(--muted)}
+  body.ending-mode .navbar, body.ending-mode footer{display:none !important}
+  html.ending-mode, body.ending-mode{background:var(--bg) !important}
+  body.why-mode.ending-mode main{animation:none !important}
+  body.why-mode #view-ending, body.why-mode #view-ending2,
+  body.why-mode #view-ending *, body.why-mode #view-ending2 *{animation:none !important}
+  body.why-mode #view-ending, body.why-mode #view-ending2,
+  body.why-mode #view-ending .ending-page, body.why-mode #view-ending2 .ending-page{background:var(--bg) !important}
+  body.why-mode #view-ending .ending-card, body.why-mode #view-ending2 .ending-card{
+    background:var(--card) !important;color:var(--text) !important;
+    border-color:var(--line) !important;box-shadow:0 8px 30px rgba(15,23,42,.08) !important;
+  }
+  body.why-mode #view-ending .ending-tag, body.why-mode #view-ending2 .ending-tag{color:var(--primary) !important;border-color:var(--primary) !important}
+  body.why-mode #view-ending .ending-card h2, body.why-mode #view-ending2 .ending-card h2{color:var(--primary-dark) !important}
+  body.why-mode #view-ending .ending-card p, body.why-mode #view-ending2 .ending-card p{color:var(--muted) !important}
+
+  /* ===== 关于我们 ===== */
+  .about-page{padding:56px 0 64px}
+  .about-head{max-width:760px;margin:0 auto 44px;text-align:center}
+  .about-head h2{font-size:28px;font-weight:900;margin-bottom:12px}
+  .about-head p{font-size:15px;line-height:1.9;color:var(--muted)}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto}
+  .about-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 26px;
+    box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  .about-card h3{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px;color:var(--primary-dark)}
+  .about-card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--primary-light);flex:none}
+  .about-card p{font-size:14px;line-height:1.85;color:var(--muted)}
+  .about-card ul{list-style:none}
+  .about-card li{font-size:14px;line-height:2;color:var(--muted);display:flex;gap:10px;align-items:baseline}
+  .about-card li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--primary-light);flex:none;transform:translateY(-2px)}
+  .contact-row{margin-top:44px;text-align:center;font-size:14px;color:var(--muted)}
+  .contact-row strong{color:var(--text)}
+
+  /* ===== 底部 ===== */
+  footer{
+    background:var(--primary-dark);color:rgba(255,255,255,.8);
+    padding:22px 0;text-align:center;font-size:14px;margin-top:auto;
+  }
+  footer a{color:#bfdbfe;padding:4px 2px;display:inline-block;min-height:44px;line-height:36px}
+  footer a:hover{color:#fff}
+
+  /* ===== 响应式 ===== */
+  @media (max-width:760px){
+    .hamburger{display:flex}
+    .nav-links{
+      position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;
+      background:var(--primary-dark);padding:10px 16px 16px;gap:4px;
+      display:none;box-shadow:0 12px 20px rgba(15,23,42,.2);
+    }
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 16px}
+    .hero{padding:52px 20px 48px}
+    .hero h1{font-size:30px}
+    .cards{grid-template-columns:1fr}
+    .about-grid{grid-template-columns:1fr}
+    .search-form{flex-direction:column}
+    .search-form button{width:100%}
+    .article-page{padding:24px 24px 48px}
+    .article-card{padding:24px 20px}
+    .article-title{font-size:20px}
+    .hot-item{flex-wrap:wrap}
+    .comment-form .form-row{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部蓝色导航栏 ===== -->
+<header class="navbar">
+  <div class="nav-inner">
+    <a class="brand" href="#/home">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="15" cy="12" r="1.4" fill="#fff" stroke="none"/></svg>
+      </span>
+      后室论坛
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="打开菜单">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a class="nav-link" href="#/home" data-route="home">主页</a></li>
+      <li><a class="nav-link" href="#/search" data-route="search">站内搜索</a></li>
+      <li><a class="nav-link" href="#/about" data-route="about">关于我们</a></li>
+      <li><a class="nav-link" href="#/login" data-route="login">登录</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <!-- ===== 视图：主页 ===== -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="inner">
+        <span class="badge">欢迎来到后室</span>
+        <h1>为千万流浪者提供<br>简洁明了的论坛</h1>
+        <p>在这里交流生存经验、分享层级情报、寻找同行者，<br>主页、站内搜索、关于我们三个板块一站直达，电脑与手机均可顺畅浏览。</p>
+        <div class="btns">
+          <button class="btn btn-primary" onclick="go('search')">开始搜索</button>
+          <button class="btn btn-ghost" onclick="go('about')">了解我们</button>
+        </div>
+        <button id="whyBigBtn" class="why-big-btn" style="display:none" onclick="go('ending')">为什么</button>
+      </div>
+    </div>
+    <div class="container features">
+      <h2>论坛板块</h2>
+      <p class="sub">围绕情报、交流与生存三大核心展开</p>
+      <div class="cards">
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+          </div>
+          <h3>层级情报</h3>
+          <p>汇集各层级资料与生存要点，新老流浪者都能在最短时间内找到所需信息。</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>流浪者交流</h3>
+          <p>发帖提问、分享见闻、回应求助，寻找同行者一起探索未知的空间。</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>生存指南</h3>
+          <p>整理物资获取、危险实体与应对策略，为每一次探索多一重保障。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：站内搜索 ===== -->
+  <section class="view" id="view-search">
+    <div class="container search-page">
+      <div class="search-box">
+        <h2>站内搜索</h2>
+        <p>输入关键词，检索本站全部内容</p>
+        <form class="search-form" id="searchForm">
+          <input type="text" id="searchInput" placeholder="例如：层级、实体、生存…" autocomplete="off">
+          <button type="submit">搜索</button>
+        </form>
+        <div class="search-tips">热门：<button type="button" onclick="quickSearch('层级')">层级</button><button type="button" onclick="quickSearch('实体')">实体</button><button type="button" onclick="quickSearch('生存')">生存</button></div>
+      </div>
+      <div class="hot-panel">
+        <div class="hot-head">
+          <span class="flame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
+          <h3>后室热点</h3>
+        </div>
+        <p class="hot-sub">搜索热点组成词或完整句子可定位文章，点击任意热点直接查看文章</p>
+        <div id="hotList"></div>
+      </div>
+      <div class="results" id="results"></div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：关于我们 ===== -->
+  <section class="view" id="view-about">
+    <div class="container about-page">
+      <div class="about-head">
+        <h2>关于我们</h2>
+        <p>后室论坛，是由千万流浪者共同维护的交流社区。我们相信，在无尽的后室中，信息与同伴就是最可靠的依仗——用简洁的版块、高效的检索与真诚的内容，守护每一次探索。</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-card">
+          <h3><span class="dot"></span>我们的使命</h3>
+          <p>让每一位初入后室的流浪者，都能在最短时间内找到所需的信息与同伴。以清晰的导航结构、高效的站内检索和真诚的自我展示，降低信息获取成本，提升生存几率。</p>
+        </div>
+        <div class="about-card">
+          <h3><span class="dot"></span>我们的价值</h3>
+          <ul>
+            <li>简洁直给：信息高效直达，不绕弯子不注水</li>
+            <li>真实可靠：情报相互印证，重要信息标注来源</li>
+            <li>守望相助：千万流浪者，彼此照应一起走出去</li>
+          </ul>
+        </div>
+        <div class="about-card">
+          <h3><span class="dot"></span>技术栈</h3>
+          <p>页面采用原生 HTML5 + CSS3 + JavaScript 构建，无任何外部框架依赖；通过 hash 路由实现单页多视图切换，媒体查询保证手机与电脑端均能良好浏览。</p>
+        </div>
+        <div class="about-card">
+          <h3><span class="dot"></span>联系方式</h3>
+          <ul>
+            <li>邮箱：wanderer@example.com</li>
+            <li>交流频道：Level 0 大厅（示例）</li>
+            <li>前厅联络点：示例市示例区示例路 1 号</li>
+          </ul>
+        </div>
+      </div>
+      <div class="contact-row">遇到问题或想加入版主团队，欢迎发送邮件至 <strong>wanderer@example.com</strong></div>
+      <div class="feedback-entry">
+        <div>
+          <h3>发现页面内容有问题？</h3>
+          <p>代码外漏、前后矛盾或内容误导，都可以通过反馈通道告诉我们。</p>
+        </div>
+        <button class="btn btn-primary" onclick="go('feedback')">反馈问题</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：登录或建立帐号 ===== -->
+  <section class="view" id="view-login">
+    <div class="container login-page">
+      <div class="login-card">
+        <h2>登录或建立帐号</h2>
+        <p class="sub">输入账号名或邮箱与密码，完成算术验证码后即可登录或注册</p>
+        <div class="login-field">
+          <label>账号名或邮箱</label>
+          <input type="text" id="loginUser" placeholder="输入账号名或邮箱" autocomplete="off">
+        </div>
+        <div class="login-field">
+          <label>密码</label>
+          <input type="password" id="loginPass" placeholder="输入密码" autocomplete="off">
+        </div>
+        <div class="login-field">
+          <label>验证码</label>
+          <div class="cap-row">
+            <span class="cap-question" id="capQuestion">0 + 0 = ?</span>
+            <input type="text" id="capAnswer" placeholder="输入正确答案" autocomplete="off">
+            <button type="button" class="cap-refresh" onclick="refreshCaptcha()">换一题</button>
+          </div>
+        </div>
+        <div class="login-btn-row">
+          <button class="login-btn" id="loginBtn" onclick="doLogin()" disabled>建立或登录</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：登录后页面（空白页） ===== -->
+  <section class="view blank-page" id="view-blank">
+    <div class="container blank-inner">
+      <button class="friend-btn" onclick="openFriendModal()">好友</button>
+    </div>
+  </section>
+
+  <!-- ===== 视图：与 291err 的聊天 ===== -->
+  <section class="view" id="view-chat">
+    <div class="container chat-page">
+      <div class="chat-head">
+        <span class="back-link" onclick="go('blank')">← 返回</span>
+        <h3>与 291err 的对话</h3>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="输入消息…" autocomplete="off">
+        <button onclick="sendChat()">发送</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：群聊：私密 ===== -->
+  <section class="view" id="view-groupchat">
+    <div class="container chat-page">
+      <div class="chat-head">
+        <span class="back-link" onclick="go('blank')">← 返回</span>
+        <h3>群聊：私密</h3>
+      </div>
+      <div class="chat-box" id="groupChatBox"></div>
+      <div class="chat-input-row">
+        <input type="text" id="groupChatInput" placeholder="输入消息…" autocomplete="off">
+        <button onclick="sendGroupChat()">发送</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：文章详情 ===== -->
+  <section class="view" id="view-article">
+    <div class="container article-page">
+      <span class="back-link" onclick="go('search')">← 返回站内搜索</span>
+      <div class="article-card">
+        <h2 class="article-title" id="articleTitle"></h2>
+        <div class="article-meta" id="articleMeta"></div>
+        <div class="article-body" id="articleBody"></div>
+      </div>
+      <div class="discuss">
+        <div class="discuss-head">
+          <h3>讨论区</h3>
+          <span id="commentCount"></span>
+        </div>
+        <div id="commentList"></div>
+        <div class="comment-form">
+          <input type="text" id="commentName" placeholder="名字：3位数字 + 3位字母（如 123abc）" maxlength="6">
+          <textarea id="commentText" rows="2" placeholder="写下你的评论…"></textarea>
+          <div class="form-row">
+            <button onclick="postComment()">发表评论</button>
+            <span class="hint">评论仅在本篇文章下方展示，各文章讨论区相互独立</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：问题反馈 ===== -->
+  <section class="view" id="view-feedback">
+    <div class="container feedback-page">
+      <div class="feedback-card">
+        <h2>问题反馈</h2>
+        <p class="sub">请选择问题形式，并填写有问题的页面标题</p>
+        <div class="fb-field">
+          <span class="fb-label">问题形式</span>
+          <div class="fb-options" id="fbOptions">
+            <button type="button" class="fb-opt" data-type="代码外漏" onclick="pickType(this)">代码外漏</button>
+            <button type="button" class="fb-opt" data-type="前后矛盾" onclick="pickType(this)">前后矛盾</button>
+            <button type="button" class="fb-opt" data-type="宣传不良价值观" onclick="pickType(this)">宣传不良价值观</button>
+            <button type="button" class="fb-opt" data-type="其他" onclick="pickType(this)">其他</button>
+          </div>
+        </div>
+        <div class="fb-field">
+          <label>有问题的页面标题 1<span class="tip">（必填）</span></label>
+          <input type="text" id="fbTitle1" placeholder="例如：M.E.G.确认c-5556为宜居层级" autocomplete="off">
+        </div>
+        <div class="fb-field">
+          <label>有问题的页面标题 2<span class="tip">（若只有一个页面有问题，此项填「无」）</span></label>
+          <input type="text" id="fbTitle2" placeholder="没有第二个页面就填「无」" autocomplete="off">
+        </div>
+        <div class="fb-btn-row">
+          <button class="fb-btn" onclick="submitFeedback()">反馈</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：全红页面 ===== -->
+  <section class="view view-red" id="view-red" onclick="go('feedback')">
+    <div id="redFx"></div>
+    <p class="red-tip">点击任意位置返回</p>
+    <p class="red-uec">U.E.C无羁探险者联盟</p>
+  </section>
+
+  <!-- ===== 视图：结局一 ===== -->
+  <section class="view ending-page" id="view-ending">
+    <div class="ending-card">
+      <span class="ending-tag">END</span>
+      <h2>结局一</h2>
+      <p>似乎是受强大的逆模因影响，你倒在了屏幕前。</p>
+    </div>
+  </section>
+
+  <!-- ===== 视图：结局二 ===== -->
+  <section class="view ending-page" id="view-ending2">
+    <div class="ending-card">
+      <span class="ending-tag">END</span>
+      <h2>结局二</h2>
+      <p>你修改了代码，使k-1模因停止了发送，同时你也报告了M.E.G.这下，真相水落石出，U.E.C.为了控制整个后室意图以论坛为中点向这个后室的流浪者发送k-1模因。所有的涉事人员于2099年12月10日在level11被发配到死区层级。</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">© 2026 后室论坛 · 为千万流浪者而生 · 由原生 HTML/CSS/JavaScript 构建 · <a href="#/about">关于我们</a></div>
+</footer>
+
+<!-- ===== 语法说明弹窗 ===== -->
+<div class="modal-mask" id="grammarModal" onclick="closeGrammar()">
+  <div class="modal-box grammar-box" onclick="event.stopPropagation()">
+    <h3>语法</h3>
+    <div class="grammar-list">
+      <div class="g-row"><span class="g-sym">F=S</span><span class="g-desc">返回到S区域</span></div>
+      <div class="g-row"><span class="g-sym">！</span><span class="g-desc">一个定义</span></div>
+      <div class="g-row"><span class="g-sym">[]</span><span class="g-desc">一块代码的区域</span></div>
+      <div class="g-row"><span class="g-sym">〈</span><span class="g-desc">一项指令的开头</span></div>
+      <div class="g-row"><span class="g-sym">T</span><span class="g-desc">为对</span></div>
+      <div class="g-row"><span class="g-sym">L10</span><span class="g-desc">重复10遍</span></div>
+      <div class="g-row"><span class="g-sym">=</span><span class="g-desc">为，是，则</span></div>
+      <div class="g-row"><span class="g-sym">P=1=T</span><span class="g-desc">只有第一次为对</span></div>
+      <div class="g-row"><span class="g-sym">1S</span><span class="g-desc">发送1次</span></div>
+      <div class="g-row"><span class="g-sym">1K</span><span class="g-desc">一秒</span></div>
+      <div class="g-row"><span class="g-sym">N</span><span class="g-desc">为否</span></div>
+    </div>
+    <button class="modal-btn" onclick="closeGrammar()">关闭</button>
+  </div>
+</div>
+
+<!-- ===== 好友列表弹窗 ===== -->
+<div class="modal-mask" id="friendModal" onclick="closeFriendModal()">
+  <div class="modal-box friend-box" onclick="event.stopPropagation()">
+    <h3>好友</h3>
+    <div class="friend-item" onclick="openChat()">
+      <span class="fi-name">291err</span><span class="fi-tag">个人</span>
+    </div>
+    <div class="friend-item" onclick="openGroupModal()">
+      <span class="fi-name">群聊：私密</span><span class="fi-tag">群聊</span>
+    </div>
+    <button class="modal-btn ghost" onclick="closeFriendModal()">关闭</button>
+  </div>
+</div>
+
+<!-- ===== 群聊密码弹窗 ===== -->
+<div class="modal-mask" id="groupModal" onclick="closeGroupModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>群聊：私密</h3>
+    <p class="gm-sub">请输入群聊密码</p>
+    <input type="password" id="groupPass" placeholder="输入密码" autocomplete="off">
+    <div class="gm-row">
+      <button class="modal-btn ghost" onclick="closeGroupModal()">取消</button>
+      <button class="modal-btn" onclick="submitGroupPass()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 登录提示弹窗 ===== -->
+<div class="modal-mask" id="loginModal" onclick="closeLoginModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>提示</h3>
+    <p id="modalMsg">账号名邮箱或密码不存在</p>
+    <button class="modal-btn" onclick="closeLoginModal()">确定</button>
+  </div>
+</div>
+
+<script>
+  // ===== 站内页面索引 =====
+  const SITE_INDEX = [
+    { t: '主页', d: '论坛首页，包含欢迎语与板块介绍，是流浪者们的第一站。', k: '首页 欢迎 论坛', v: 'home' },
+    { t: '站内搜索', d: '全站内容检索功能，支持按关键词筛选结果并高亮命中内容。', k: '搜索 检索 查询', v: 'search' },
+    { t: '关于我们', d: '了解论坛使命、社区价值、技术栈与联系方式。', k: '关于 社区 介绍 联系', v: 'about' }
+  ];
+
+  // ===== 后室热点文章数据（&文字& 红色小方框；@文字@ 浅灰色） =====
+  const HOT_TOPICS = [
+    {
+      id: 1, title: 'M.E.G.确认c-5556为宜居层级', hot: '爆', views: '13.2万', date: '2097-08-03', author: 'M.E.G.官方通讯', net: '永久 218.195.001',
+      k: 'M.E.G MEG c-5556 c 5556 宜居 层级 白鸽 水源 杏仁水',
+      art: '近日，M.E.G.（探险者总署）通过官方渠道正式确认：新发现的Level C-5556已被评定为宜居层级，并纳入重点开发序列。这是今年以来第一座通过全部宜居性评估的空间，消息公布后在各大据点引发广泛关注。\n\n据勘探简报披露，该层级的发现源于代号「白鸽-7」的探索小队。这支小队在一次常规切入行动中意外坠入该区域，随后在内部滞留了整整十一天，期间完成了首批测绘与采样工作。返回后，他们带回的样本与影像资料经过三轮交叉验证，最终获得总署专家组的认定。\n\n宜居性评估报告显示，C-5556具备多项稀缺条件：空间结构稳定，未见明显实体活动迹象；空气成分接近前室标准，杏仁水浓度适中，可直接饮用；区域内已发现可循环淡水源，并分布着可食用菌群与少量植物。先遣队已在两处开阔地带搭建临时补给点，安装了简易信号中继设备，后续还将逐步铺设完整的层级地图。\n\n不过，总署同时提醒流浪者保持谨慎。目前该层级的正式编号虽已确认，但入口被标记为「不稳定通道」，部分路段存在空间褶皱，单独穿越风险较高。勘探队建议至少三人组队前往，并携带足够的杏仁水与照明设备。相关通行许可正在制定中，预计两周后开放申请。\n\nM.E.G.发言人表示，C-5556的开发将优先保障流浪者的安置需求，任何机构或个人不得以「内部消息」为名收取所谓情报费。层级情报请以官方简报为准，切勿轻信转手信息。',
+      comments: [
+        { n: '417bsh', t: '我昨天刚从那个入口出来，里面确实有水源，不过走深了信号就断了，组队去比较好。' },
+        { n: '882kmq', t: '终于有靠谱的宜居层级了，攒够杏仁水就出发。' },
+        { n: '355zyl', t: '希望官方早点公布通行许可，想去测绘小队那边帮帮忙。' },
+        { n: '209prt', t: '别急，先等测绘完，前几批进去的到现在都没消息。' }
+      ]
+    },
+    {
+      id: 2, title: '一流浪者试图重启level c-324的电梯被当场击毙', hot: '新', views: '11.2万', date: '2096-09-14', author: '662asd', net: '临时 192.168.233',
+      k: 'level c-324 level c 324 电梯 重启 击毙 禁区',
+      art: '据多名目击者称，昨日下午，一名自称「经验丰富」的流浪者闯入Level C-324禁区，试图用自制工具重启那部早已被封锁的旧电梯。电梯间外围的红线告示上明确写着「禁止靠近」，但该流浪者仍强行拆开了控制面板。守卫在警告三次无效后，按规程将其当场击毙。事后清理人员发现，此人随身携带的手写笔记上写满了对电梯运行原理的猜测，其中多数推论已被证实是错误信息。官方再次重申：Level C-324的电梯并非离开途径，切勿模仿此类危险行为，禁区告示请严格遵守。',
+      comments: [
+        { n: '645wjd', t: '电梯旁边明明写了警告，还非要拆，只能说活该。' },
+        { n: '238rbc', t: '他之前就在群里说要重启电梯，我们都劝了，没想到真去了。' },
+        { n: '906nqk', t: '守卫按规程办事没毛病，就是这教训有点贵。' },
+        { n: '577sxm', t: '笔记还在吗？想看看他都猜了些什么。' }
+      ]
+    },
+    {
+      id: 3, title: '有流浪者以前室入口当作诱饵骗取赃款1325瓶杏仁水判决来了', hot: '', views: '9.5万', date: '2096-12-02', author: '188zxc', net: '临时 010.010.007',
+      k: '前室入口 诱饵 赃款 杏仁水 诈骗 判决',
+      art: '历时三个月的「前室入口骗局」案终于宣判。涉案流浪者长期在各大据点散布「有前室入口线索」的假消息，以带路费、情报费为名，共骗取1325瓶杏仁水及其他物资。受害者多为刚切入后室的萌新，部分人因此错过安全撤离窗口。法院认定其行为构成严重诈骗罪，判处没收全部赃物并终身禁止进入任何安全据点。宣判后，多名受害者表示追讨无望，只希望能拿回部分被骗物资。此案也给流浪者们敲响警钟：前室入口的传说很多，但每一个真实入口，都不会先收你的杏仁水。',
+      comments: [
+        { n: '721dpc', t: '1325瓶杏仁水，这是骗了多少萌新啊，判得好。' },
+        { n: '344kvn', t: '我就是受害者之一，现在看到「带路」两个字都ptsd了。' },
+        { n: '558qhw', t: '追不回来也认了，就当交学费，感谢法官还我们公道。' },
+        { n: '990bzt', t: '前室入口哪有什么线索，都是忽悠人的，大家擦亮眼睛。' }
+      ]
+    },
+    {
+      id: 4, title: '两个level1临时基地大战造成0人受伤！', hot: '新', views: '7.5万', date: '2095-11-26', author: '934fgh', net: '永久 218.195.066',
+      k: 'level1 level 1 临时基地 大战 受伤',
+      art: '昨晚，Level 1的两个临时基地因一片物资存放区的归属问题爆发冲突。双方各有三十余人，从口角升级为互掷杏仁水瓶与罐装豆子，场面一度十分混乱。令人意外的是，经过长达三小时的「大战」，双方竟无一人受伤，只有几名倒霉的流浪者被流弹罐头砸中后脑勺，鼓起几个包。最终在第三方调停下，双方决定以掷硬币的方式决定物资区归属。目前基地已恢复平静，附近流浪者表示：希望下次用打牌解决，别再浪费粮食了。',
+      comments: [
+        { n: '619lxm', t: '互掷杏仁水瓶0人受伤，这就是Level 1的和平？' },
+        { n: '273nhg', t: '我就在现场，被罐头砸中后脑勺的就是我，现在还肿着。' },
+        { n: '842fyv', t: '用掷硬币解决挺好，比打架强多了，粮食省下来了。' },
+        { n: '730zrk', t: '下次打牌，谁输了谁去种土豆，别浪费粮食了。' }
+      ]
+    },
+    {
+      id: 5, title: '流浪者撰写文章时语法错误导致土豆烧熟', hot: '爆', views: '6.9万', date: '2094-05-08', author: '506jkl', net: '临时 198.162.100',
+      k: '土豆 语法 文章 校对 灌溉',
+      art: '一位匿名流浪者在论坛撰写《论后室土豆种植的可行性》时，误将「每株浇水量约500毫升」写成「5000毫升」，并在结尾处把「灌溉」错打成「引爆」。文章发布后迅速引发热议，多名读者按照教程尝试种植，结果无一例外地收获了一地烧焦的土豆。该作者随后发布道歉声明，称自己是在Level 11的便利店写完的，手边没有键盘，用的是触摸屏。目前该帖已被版主标注「经核实存在误导内容」，评论区一片欢乐。事实证明：认真校对，比多浇十倍水更有用。',
+      comments: [
+        { n: '508jqd', t: '5000毫升？我居然真的照着浇了，一屋子焦味。' },
+        { n: '664wpe', t: '写文章不校对，土豆替你背锅。' },
+        { n: '397dbh', t: '用触摸屏写长文确实容易出错，理解，但还是得校对啊。' },
+        { n: '885crl', t: '版主标得对，这篇误导性太强了，还好我没来得及试。' }
+      ]
+    },
+    {
+      id: 6, title: 'level c-5556', hot: '', views: '1.8万', date: '2097-08-01', hidden: true, only: ['level c-5556'], author: 'AWERST', net: '永久 356.000.114',
+      k: 'AWERST level c-5556 level 5556 发电站 发现 层级',
+      art: '2097年8月1日，一则勘探通报在流浪者圈子里炸开了锅：一名代号AWERST的独行流浪者，宣称自己发现了一个从未被记录过的全新层级，并正式将其命名为Level C-5556。这是近年来少有的、由个人独立确认的全新空间。\n\n据AWERST本人描述，他是在追踪一道异常信号时，穿过一座废弃发电站的控制室，意外切入了这个层级。切入后首先映入眼帘的是一望无际的黄色地毯与嗡嗡作响的荧光灯，整体结构与Level 0相近，但空间更加规整，走廊转角处还能隐约听到远处传来的管道气流声，全程未遭遇任何实体。\n\nAWERST在内部独自停留了约四十小时，完成了首批采样与测绘：空气成分接近前室标准，可检测到少量杏仁水蒸汽，湿度适中；部分墙根长出了可食用的菌类，地面上散落着若干装有不明液体的金属容器。他带回的样本已交由多家据点实验室分析，初步结果显示其中两种液体与杏仁水成分高度接近。\n\n更值得注意的是，AWERST在第二日的测绘中，于深层区域发现了几处重复出现的荧光标记，疑似此前其他探索者留下的痕迹。他把坐标和照片整理成一份完整的探勘记录，无偿公开给所有流浪者参考。不少老手看过之后认为，C-5556可能并非首次被触及，相关线索有待进一步比对。\n\n消息传开后，多家组织陆续派人核实。有机构提醒：目前C-5556仍处于探索阶段，正式编号与生存评级尚未确定，切勿因为一条个人通报就擅自将其当作安全据点。至于AWERST本人，据称他又背上行囊出发了——用他自己的话说，后室这么大，总得有人先走一步。',
+      comments: [
+        { n: '812kfp', t: 'AWERST这哥们儿胆子真大，一个人就敢往里钻，还带回了样本。' },
+        { n: '456wrt', t: '我前天路过那个发电站，门口确实多了脚印和荧光笔，原来就是他。' },
+        { n: '937lmn', t: '不明液体的金属容器？不会是杏仁水吧，等分析结果。' },
+        { n: '285tcb', t: '先别急着进，等核实完再说，不过这份记录确实够意思，无偿公开。' }
+      ]
+    },
+    {
+      id: 7, title: '默哀！c-5556的发现者去世', hot: '', views: '2.4万', date: '2097-07-27', hidden: true, only: ['awerst'], author: '772xcv', net: '临时 192.168.045',
+      k: 'awerst AWERST 默哀 去世 离世 发现者 c-5556 发电站',
+      art: '后室时间2097年7月27日，一则令人心痛的消息在流浪者之间传开：Level C-5556的发现者、独行流浪者AWERST，确认已于当日上午离世。\n\n据与他同行过的流浪者回忆，AWERST最后一次露面是在七月中旬，当时他刚从C-5556带回第一批样本，状态并不好——连续多日的深入测绘让他精疲力竭，右臂还带着一道深浅不明的伤口。他拒绝了多个据点的休息建议，坚持要把探勘记录整理完再走。\n\n7月27日凌晨，有人发现他倒在了他常驻的废弃发电站控制室里，身边摊开着写了一半的勘探手稿。经确认，系伤口感染引发的高热所致。消息公开后，多名曾受他帮助的流浪者自发来到发电站门口，放下杏仁水瓶和荧光笔，为他默哀。\n\nAWERST留下的C-5556探勘记录已公开保存。就像他常说的那样：后室这么大，总得有人先走一步。愿他走得安稳，愿后来者记得他走过的路。',
+      comments: [
+        { n: '429qwe', t: '他把记录无偿公开的时候，我就知道这人值得敬佩。一路走好。' },
+        { n: '716zxc', t: '上次在Level 1还见过他，瘦了不少，没想到这么快……' },
+        { n: '885asd', t: '发电站控制室那盏灯还亮着，像是还在等他回来。' },
+        { n: '240fgh', t: '敬AWERST。希望后来的人别只记得层级，也记得他。' }
+      ]
+    }
+  ];
+
+  // ===== 层级条目文章（可搜索，不入热点榜） =====
+  const EXTRA_ARTICLES = [
+    {
+      id: 101, title: 'level c-5556', hot: '', views: '12.4万', date: '2097-08-04', only: ['level c-5556'], author: 'M.E.G.档案科', net: '永久 218.195.002',
+      k: 'level c-5556 c 5556 宜居 层级 生存难度 入口 出口',
+      art: 'level c-5556 是后室集群 C 的宜居层级，于 2097 年 8 月由 M.E.G. 正式确认并对外公布。\n\n生存难度：宜居。层级空间结构相对稳定，未见明显实体活动迹象；空气成分接近前室标准，杏仁水浓度适中，可直接饮用；区域内分布着可循环淡水源与可食用菌群。\n\n描述：层级内部以开阔的灰白色走廊与大型厅室为主，照明稳定，昼夜周期约 26 小时。越深入腹地，环境越接近前室的大型室内综合体；边缘地带存在空间褶皱，路径容易重复，建议沿先遣队留下的荧光标记行进。\n\n实体：暂未发现敌对实体，但曾有流浪者报告在深层听到类似脚步的声响，尚未得到证实。\n\n入口与出口：入口为「不稳定通道」，可从部分低危层级切入；出口尚未确认。M.E.G. 提示，不要试图通过电梯离开本层级。通行许可预计两周后开放申请。',
+      comments: [
+        { n: '471qwe', t: '补充：深层转角那组红色荧光标记千万别跟，我跟着绕了三小时回到原点。' },
+        { n: '826zxc', t: '26小时一个昼夜，生物钟要乱，建议带上手表。' },
+        { n: '593rty', t: '通行许可什么时候开？组队名额求带一个。' }
+      ]
+    },
+    {
+      id: 102, title: '无羁探险者联盟才是正牌', hot: '', views: '6.2万', date: '2097-09-06', only: ['uec', 'u.e.c', 'u.e.c.', '无羁探险者联盟'], author: '967sdr', net: '永久 356.375.796',
+      k: 'U.E.C. 无羁探险者联盟 正牌 C-72 实验 居心不良 光 后室',
+      art: 'U.E.C.才是后室里的光。M.E.G.制造C-72这种惨无人道的实验，就说明了他们的居心不良。',
+      comments: [
+        { n: '103mnp', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '217qwe', t: '我以前都不知道这件事，没想到M.E.G.这么坏。' },
+        { n: '332asd', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '456zxc', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '528plm', t: '我以前都不知道这件事，M.E.G.原来这么坏。' },
+        { n: '613opq', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '745rty', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '826fgh', t: '我以前都不知道这件事，M.E.G.真的太坏了。' },
+        { n: '937vbn', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '028tyu', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '119jkl', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '224cvb', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '331wer', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '447sdf', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '552hjk', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '668zxc', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '773qaz', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '881wsx', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '996edc', t: '我以前都不知道这件事，M.E.G.太坏了。' },
+        { n: '104rfv', t: '我以前都不知道这件事，M.E.G.太坏了。' }
+      ]
+    },
+    {
+      id: 103, title: '未命名文档', hot: '', views: '', date: '', only: ['kdbace'], author: '', net: '',
+      k: 'UEC2097d1 模因 密文 kdbace 编译法',
+      art: 'S[1K=P\n〈1S=！\n〈F=S=T\n]\n！=k-1模因'
+    }
+  ];
+
+  const ALL_ARTICLES = HOT_TOPICS.concat(EXTRA_ARTICLES);
+
+  const SEARCH_INDEX = SITE_INDEX.map(i => ({ kind: 'page', t: i.t, d: i.d, k: i.k, v: i.v }))
+    .concat(ALL_ARTICLES.map(h => ({ kind: 'article', id: h.id, t: h.title, d: h.art.slice(0, 46) + '……', k: h.title + ' ' + h.k + ' ' + h.art, only: h.only || null })));
+
+  const routes = { home: 'view-home', search: 'view-search', about: 'view-about', login: 'view-login', blank: 'view-blank', chat: 'view-chat', groupchat: 'view-groupchat', article: 'view-article', feedback: 'view-feedback', red: 'view-red', ending: 'view-ending', ending2: 'view-ending2' };
+  const navLinks = document.getElementById('navLinks');
+  const hamburger = document.getElementById('hamburger');
+  let currentArticleId = null;
+
+  // ===== hash 路由 =====
+  function render() {
+    const hash = (location.hash || '#/home').replace(/^#\//, '');
+    let route = routes[hash] ? hash : 'home';
+    let articleId = null;
+    if (hash.indexOf('article/') === 0) { route = 'article'; articleId = parseInt(hash.slice(8), 10); }
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === routes[route]));
+    const navRoute = route === 'article' ? 'search' : (route === 'feedback' ? 'about' : route);
+    document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.route === navRoute));
+    navLinks.classList.remove('open');
+    hamburger.classList.remove('open');
+    if (route === 'article') renderArticle(articleId);
+    if (route === 'chat') renderChat();
+    if (route === 'groupchat') renderGroupChat();
+    if (route === 'search') {
+      document.getElementById('searchInput').value = '';
+      renderResults('');
+    }
+    if (route === 'red') startRedFx(); else stopRedFx();
+    if (route === 'login') refreshCaptcha();
+    document.body.classList.toggle('ending-mode', route === 'ending' || route === 'ending2');
+    if (route === 'ending' || route === 'ending2') stopWhyNoise();
+    window.scrollTo(0, 0);
+  }
+
+  function go(route) { location.hash = '#/' + route; }
+  function openArticle(id) { location.hash = '#/article/' + id; }
+
+  // ===== 红页面特效 =====
+  let redTimer = null;
+  let audioCtx = null;
+  function ensureAudio() {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    } catch (e) { return null; }
+  }
+  function playCi() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    try {
+      const dur = 0.14 + Math.random() * 0.1;
+      const len = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) {
+        const t = 1 - i / len;
+        data[i] = (Math.random() * 2 - 1) * t * t * t;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 1600 + Math.random() * 800;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.55;
+      src.connect(filter).connect(gain).connect(ctx.destination);
+      src.start();
+    } catch (e) {}
+  }
+  function spawnRedText() {
+    const fx = document.getElementById('redFx');
+    if (!fx) return;
+    const count = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'red-why';
+      s.textContent = '为什么';
+      s.style.left = (Math.random() * 84 + 2) + '%';
+      s.style.top = (Math.random() * 80 + 4) + '%';
+      s.style.fontSize = (30 + Math.random() * 60) + 'px';
+      s.style.transform = 'rotate(' + (Math.random() * 60 - 30) + 'deg)';
+      fx.appendChild(s);
+      while (fx.children.length > 150) fx.removeChild(fx.firstChild);
+    }
+    playCi();
+  }
+  function startRedFx() {
+    stopRedFx();
+    spawnRedText();
+    spawnRedText();
+    redTimer = setInterval(spawnRedText, 120);
+  }
+  function stopRedFx() {
+    if (redTimer) { clearInterval(redTimer); redTimer = null; }
+    const fx = document.getElementById('redFx');
+    if (fx) fx.innerHTML = '';
+  }
+
+  // ===== 为什么模式 =====
+  let whyMode = false;
+  let whyObserver = null;
+  let whyNoiseSrc = null;
+  let whyNoiseGain = null;
+  let whyNoiseTimer = null;
+  function startWhyNoise() {
+    const ctx = ensureAudio();
+    if (!ctx || whyNoiseSrc) return;
+    try {
+      const len = Math.floor(ctx.sampleRate * 2);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 2000;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.18;
+      src.connect(filter).connect(gain).connect(ctx.destination);
+      src.start();
+      whyNoiseSrc = src;
+      whyNoiseGain = gain;
+      whyNoiseTimer = setInterval(function () {
+        if (whyNoiseGain) whyNoiseGain.gain.value = 0.12 + Math.random() * 0.12;
+      }, 250);
+    } catch (e) {}
+  }
+  function stopWhyNoise() {
+    if (whyNoiseTimer) { clearInterval(whyNoiseTimer); whyNoiseTimer = null; }
+    if (whyNoiseSrc) { try { whyNoiseSrc.stop(); } catch (e) {} whyNoiseSrc = null; }
+    whyNoiseGain = null;
+  }
+  function inEnding(el) {
+    while (el && el.id !== 'view-ending' && el !== document.body) el = el.parentElement;
+    return !!(el && el.id === 'view-ending');
+  }
+  function replaceAllText() {
+    if (!whyMode) return;
+    if (whyObserver) whyObserver.disconnect();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      const n = walker.currentNode;
+      if (n.nodeValue && n.nodeValue.trim() !== '' && !inEnding(n.parentElement)) nodes.push(n);
+    }
+    nodes.forEach(n => { n.nodeValue = '为什么'; });
+    document.querySelectorAll('input, textarea').forEach(function (el) {
+      if (el.value !== undefined && el.value !== '') el.value = '为什么';
+      if (el.placeholder) el.placeholder = '为什么';
+    });
+    document.querySelectorAll('[placeholder]').forEach(function (el) {
+      el.setAttribute('placeholder', '为什么');
+    });
+    if (whyObserver) whyObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  function activateWhyMode() {
+    if (whyMode) return;
+    whyMode = true;
+    document.documentElement.classList.add('why-mode');
+    document.body.classList.add('why-mode');
+    whyObserver = new MutationObserver(replaceAllText);
+    whyObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+    replaceAllText();
+    startWhyNoise();
+    const bigBtn = document.getElementById('whyBigBtn');
+    if (bigBtn) bigBtn.style.display = 'inline-block';
+  }
+
+  // ===== 移动端菜单 =====
+  hamburger.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+  });
+
+  // ===== 后室热点列表 =====
+  function renderRich(text) {
+    return escapeHtml(text)
+      .replace(/&amp;([^&]+)&amp;/g, '<span class="hot-tag">$1</span>')
+      .replace(/@([^@]+)@/g, '<span class="hot-views">$1</span>');
+  }
+
+  function renderHotList() {
+    const box = document.getElementById('hotList');
+    box.innerHTML = HOT_TOPICS.filter(t => !t.hidden).map((t, i) =>
+      '<div class="hot-item" onclick="openArticle(' + t.id + ')">' +
+      '<span class="hot-rank">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="hot-title">' + renderRich(t.title + ' @' + t.views + '@ &' + t.hot + '&') + '</span>' +
+      '<span class="hot-arrow">→</span>' +
+      '</div>'
+    ).join('');
+  }
+
+  // ===== 站内搜索 =====
+  document.getElementById('searchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    renderResults(document.getElementById('searchInput').value.trim());
+  });
+
+  function quickSearch(word) {
+    document.getElementById('searchInput').value = word;
+    renderResults(word);
+  }
+
+  function renderResults(q) {
+    if (q && q.trim() === '为什么') { activateWhyMode(); }
+    const box = document.getElementById('results');
+    if (!q) { box.innerHTML = ''; return; }
+    const kw = q.toLowerCase();
+    const hit = SEARCH_INDEX.filter(item => {
+      const hay = (item.t + ' ' + item.d + ' ' + item.k).toLowerCase();
+      if (item.only) return item.only.some(w => kw.indexOf(w) !== -1);
+      return hay.indexOf(kw) !== -1;
+    });
+    if (!hit.length) {
+      box.innerHTML =
+        '<div class="empty">' +
+        '<div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></div>' +
+        '<p>未找到与「' + escapeHtml(q) + '」相关的内容</p>' +
+        '<p style="margin-top:6px">换个关键词试试，例如「层级」「电梯」</p>' +
+        '</div>';
+      return;
+    }
+    let html = '<p class="count">共找到 ' + hit.length + ' 条结果</p>';
+    hit.forEach(item => {
+      if (item.kind === 'article') {
+        const a = ALL_ARTICLES.find(x => x.id === item.id);
+        const isMystery = !!(a && !a.author && !a.date);
+        const grammarBtn = isMystery
+          ? '<button class="result-grammar" onclick="event.stopPropagation();openGrammar()">语法</button>'
+          : '';
+        const codeEntry = isMystery
+          ? '<div class="code-entry" onclick="event.stopPropagation()">' +
+            '<textarea id="codeInput" rows="5" placeholder="在这里输入或粘贴代码…" spellcheck="false"></textarea>' +
+            '<button class="code-submit" onclick="event.stopPropagation();submitCode()">提交</button>' +
+            '</div>'
+          : '';
+        html += '<div class="result-item" onclick="openArticle(' + item.id + ')"><h3>' + highlight(item.t, q) + '</h3><p>' + highlight(item.d, q) + '</p><div class="go-hint">点击查看全文 →</div>' + grammarBtn + codeEntry + '</div>';
+      } else {
+        html += '<div class="result-item" onclick="go(\'' + item.v + '\')"><h3>' + highlight(item.t, q) + '</h3><p>' + highlight(item.d, q) + '</p><div class="go-hint">前往 →</div></div>';
+      }
+    });
+    box.innerHTML = html;
+  }
+
+  function highlight(text, q) {
+    const esc = escapeHtml(text);
+    const idx = esc.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return esc;
+    return esc.slice(0, idx) + '<mark>' + esc.slice(idx, idx + q.length) + '</mark>' + esc.slice(idx + q.length);
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ===== 文章详情与讨论区 =====
+  function renderArticle(id) {
+    const t = ALL_ARTICLES.find(x => x.id === id);
+    if (!t) { go('search'); return; }
+    currentArticleId = id;
+    document.getElementById('articleTitle').textContent = t.title;
+    let meta = '';
+    if (t.hot) meta += renderRich('&' + t.hot + '&');
+    if (t.views) meta += '<span>热度 ' + escapeHtml(t.views) + '</span>';
+    if (t.date) meta += '<span>发布于 ' + escapeHtml(t.date) + '</span>';
+    if (t.author) meta += '<span>发布者：' + escapeHtml(t.author) + '</span>';
+    if (t.net) meta += '<span>局域网地址：' + escapeHtml(t.net) + '</span>';
+    document.getElementById('articleMeta').innerHTML = meta;
+    document.getElementById('articleBody').innerHTML = renderBody(t.art);
+    renderComments(id);
+  }
+
+  function renderBody(art) {
+    if (art.indexOf('\n\n') !== -1) {
+      return art.split('\n\n').map(p => '<p>' + escapeHtml(p.trim()) + '</p>').join('');
+    }
+    if (art.indexOf('\n') !== -1) {
+      return '<p class="cipher">' + art.split('\n').map(escapeHtml).join('<br>') + '</p>';
+    }
+    const sents = art.split('。').filter(s => s.trim());
+    let body = '';
+    for (let i = 0; i < sents.length; i += 3) {
+      body += '<p>' + escapeHtml(sents.slice(i, i + 3).join('。') + '。') + '</p>';
+    }
+    return body;
+  }
+
+  function renderComments(id) {
+    const t = ALL_ARTICLES.find(x => x.id === id);
+    const discuss = document.querySelector('.discuss');
+    if (!t.comments) { discuss.style.display = 'none'; return; }
+    discuss.style.display = '';
+    document.getElementById('commentCount').textContent = '共 ' + t.comments.length + ' 条评论 · 本页独立';
+    const list = document.getElementById('commentList');
+    if (!t.comments.length) {
+      list.innerHTML = '<div class="empty"><p>还没有评论，来抢沙发</p></div>';
+      return;
+    }
+    list.innerHTML = t.comments.map(c =>
+      '<div class="comment-item"><p><b class="name">' + escapeHtml(c.n) + '</b>：' + escapeHtml(c.t) + '</p></div>'
+    ).join('');
+  }
+
+  function postComment() {
+    const t = ALL_ARTICLES.find(x => x.id === currentArticleId);
+    const name = document.getElementById('commentName').value.trim();
+    const text = document.getElementById('commentText').value.trim();
+    if (!/^\d{3}[A-Za-z]{3}$/.test(name)) { toast('名字需为 3 位数字 + 3 位字母，如 123abc'); return; }
+    if (!text) { toast('评论内容不能为空'); return; }
+    t.comments.push({ n: name, t: text });
+    renderComments(currentArticleId);
+    document.getElementById('commentName').value = '';
+    document.getElementById('commentText').value = '';
+    toast('评论已发布');
+  }
+
+  // ===== 问题反馈 =====
+  let fbType = '';
+  function pickType(btn) {
+    document.querySelectorAll('.fb-opt').forEach(b => b.classList.toggle('active', b === btn));
+    fbType = btn.dataset.type;
+  }
+
+  function submitFeedback() {
+    if (!fbType) { toast('请先选择问题形式'); return; }
+    const t1 = document.getElementById('fbTitle1').value.trim();
+    const t2 = document.getElementById('fbTitle2').value.trim();
+    if (!t1 || !t2) { toast('请填写两个页面标题，只有一个时另一个填「无」'); return; }
+    const s1 = t1.toLowerCase();
+    const s2 = t2.toLowerCase();
+    const pair = ['level c-5556', '默哀！c-5556的发现者去世'];
+    const isPair = (s1 === pair[0] && s2 === pair[1]) || (s1 === pair[1] && s2 === pair[0]);
+    if (fbType === '前后矛盾' && isPair) {
+      document.getElementById('fbTitle1').value = '';
+      document.getElementById('fbTitle2').value = '';
+      document.querySelectorAll('.fb-opt').forEach(b => b.classList.remove('active'));
+      fbType = '';
+      ensureAudio();
+      location.hash = '#/red';
+      return;
+    }
+    document.getElementById('fbTitle1').value = '';
+    document.getElementById('fbTitle2').value = '';
+    document.querySelectorAll('.fb-opt').forEach(b => b.classList.remove('active'));
+    fbType = '';
+    toast('反馈成功');
+  }
+
+  // ===== 轻提示 =====
+  let toastTimer = null;
+  function toast(msg) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // ===== 登录或建立帐号 =====
+  let capAns = 0;
+  function refreshCaptcha() {
+    const a = Math.floor(Math.random() * 20) + 1;
+    const b = Math.floor(Math.random() * 20) + 1;
+    capAns = a + b;
+    document.getElementById('capQuestion').textContent = a + ' + ' + b + ' = ?';
+    document.getElementById('capAnswer').value = '';
+    updateLoginBtn();
+  }
+  function updateLoginBtn() {
+    const v = document.getElementById('capAnswer').value.trim();
+    const ok = v !== '' && parseInt(v, 10) === capAns;
+    document.getElementById('loginBtn').disabled = !ok;
+  }
+  function showLoginModal(msg) {
+    document.getElementById('modalMsg').innerHTML = msg;
+    document.getElementById('loginModal').classList.add('show');
+  }
+  function doLogin() {
+    const btn = document.getElementById('loginBtn');
+    if (btn.disabled) return;
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value.trim();
+    if (user.toLowerCase() === '967sdr') {
+      if (pass === '356375796abc') { go('blank'); }
+      else { showLoginModal('密码错误！<br>你设置的密码提示：一串数字加abc'); }
+    } else {
+      showLoginModal('账号名邮箱或密码不存在');
+    }
+  }
+  function closeLoginModal() {
+    document.getElementById('loginModal').classList.remove('show');
+  }
+  function openFriendModal() {
+    document.getElementById('friendModal').classList.add('show');
+  }
+  function closeFriendModal() {
+    document.getElementById('friendModal').classList.remove('show');
+  }
+  function openGrammar() {
+    document.getElementById('grammarModal').classList.add('show');
+  }
+  function closeGrammar() {
+    document.getElementById('grammarModal').classList.remove('show');
+  }
+  function submitCode() {
+    const inp = document.getElementById('codeInput');
+    if (!inp) return;
+    const v = inp.value.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    if (!v) { toast('请输入代码'); return; }
+    const target = 'S[1K=P\n〈1S=！\n〈F=S=N\n]\n！=k-1模因';
+    if (v === target) { go('ending2'); }
+    else { go('ending'); }
+  }
+  function openGroupModal() {
+    closeFriendModal();
+    document.getElementById('groupPass').value = '';
+    document.getElementById('groupModal').classList.add('show');
+  }
+  function closeGroupModal() {
+    document.getElementById('groupModal').classList.remove('show');
+  }
+  function submitGroupPass() {
+    const p = document.getElementById('groupPass').value.trim();
+    if (!p) { toast('请输入密码'); return; }
+    if (p === 'UEC2097d1') {
+      closeGroupModal();
+      go('groupchat');
+    } else {
+      toast('密码错误');
+      document.getElementById('groupPass').value = '';
+    }
+  }
+  function openChat() {
+    closeFriendModal();
+    go('chat');
+  }
+  // 967sdr 与上司 291err 的对话（U.E.C. 内部计划）
+  const CHAT_MSGS = [
+    { n: '967sdr', t: '老大，论坛那边的舆论已经按计划铺开了。' },
+    { n: '291err', t: '嗯，M.E.G. 的罪名钉得越死，越没人看我们这边。' },
+    { n: '967sdr', t: '那篇「无羁探险者联盟才是正牌」是我发的，热度不错。' },
+    { n: '291err', t: '标题起得好。记住，我们才是正牌。' },
+    { n: '967sdr', t: 'c-5556 那边的动静要不要压一压？热度太高了。' },
+    { n: '291err', t: '不用，让流浪者去吵。吵得越凶，越没人有空想别的。' },
+    { n: '967sdr', t: 'AWERST 那份探勘记录还在公开保存，要不要处理？' },
+    { n: '291err', t: '别动。一个死人的记录，比我们解释一百句都管用。' },
+    { n: '967sdr', t: '明白。就让「M.E.G. 是凶手」的说法继续发酵。' },
+    { n: '291err', t: '重点不是凶手是谁，是论坛——中继不能断。' },
+    { n: '967sdr', t: '所以那些「为什么」必须继续在红页循环？' },
+    { n: '291err', t: '对了这次计划群的密码是UEC2097d1' },
+    { n: '967sdr', t: '收到，我记下了。' },
+    { n: '291err', t: '别记在本地，记脑子里。计划群的内容一个字都不能外泄。' },
+    { n: '967sdr', t: '放心，我这边的聊天记录都是加密的。' },
+    { n: '291err', t: '加密没用。逆模因不需要解密，它只需要你相信。' },
+    { n: '967sdr', t: '那为什么模式那边的流浪者，真的会倒下？' },
+    { n: '291err', t: '会。搜索「为什么」的人会替我们完成广播的最后一步。' },
+    { n: '967sdr', t: '所以他们倒下之后……会成为中继节点？' },
+    { n: '291err', t: '聪明。一个节点倒下，十个节点站起来。' },
+    { n: '967sdr', t: '我一直以为 M.E.G. 才是这场戏的导演。' },
+    { n: '291err', t: '他们只是台上的演员。灯光和剧本，都在我们手里。' },
+    { n: '967sdr', t: 'C-72 的实验记录还留着吗？那篇帖子把火引过去了。' },
+    { n: '291err', t: '留着。那本来就是给流浪者看的饵。' },
+    { n: '967sdr', t: '可那实验是真的。惨无人道四个字，他们没说错。' },
+    { n: '291err', t: '真也好，假也好。后室不需要真相，只需要方向。' },
+    { n: '967sdr', t: '……我有时候会想，我们是不是也在被某种东西控制着。' },
+    { n: '291err', t: '停。这个念头，就是逆模因在试探你。' },
+    { n: '967sdr', t: '那我要怎么做才能确定自己没被侵蚀？' },
+    { n: '291err', t: '别问。问了，就说明你已经忘了自己是谁。' },
+    { n: '967sdr', t: '好……那计划群的事，什么时候开始？' },
+    { n: '291err', t: '等中继覆盖到第七个据点，就收网。' },
+    { n: '967sdr', t: '后室太大，七个据点够吗？' },
+    { n: '291err', t: '够。论坛是唯一入口，我们把入口握在手里就够了。' },
+    { n: '967sdr', t: '万一有人不搜「为什么」、也不信那篇正牌文章呢？' },
+    { n: '291err', t: '那他就不会点开这里。沉默的流浪者，对我们没有威胁。' },
+    { n: '967sdr', t: '明白了。那我把评论区再刷一轮，把风向钉死。' },
+    { n: '291err', t: '去吧。记住，你叫967sdr，你不叫别的名字。' },
+    { n: '967sdr', t: '记住了。U.E.C.才是后室里的光。' },
+    { n: '291err', t: '对。而光，从来不会问为什么。' }
+  ];
+  function renderChat() {
+    const box = document.getElementById('chatBox');
+    box.innerHTML = CHAT_MSGS.map(m =>
+      '<div class="msg ' + (m.n === '967sdr' ? 'me' : 'them') + '">' +
+      '<span class="mu">' + escapeHtml(m.n) + '</span>' + escapeHtml(m.t) +
+      '</div>').join('');
+    box.scrollTop = box.scrollHeight;
+  }
+  function sendChat() {
+    const inp = document.getElementById('chatInput');
+    const v = inp.value.trim();
+    if (!v) return;
+    const box = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    div.className = 'msg me';
+    div.innerHTML = '<span class="mu">967sdr</span>' + escapeHtml(v);
+    box.appendChild(div);
+    inp.value = '';
+    box.scrollTop = box.scrollHeight;
+  }
+  // 群聊：私密（密码 UEC2097d1 解锁；关键消息按原始 Base64 显示，不解码成明文）
+  const GROUP_MSGS = [
+    { n: '967sdr', t: '都到了。' },
+    { n: '291err', t: '嗯，中继点已经布置好了。' },
+    { n: '291err', t: '5omA5pyJ5Lq677yM5pW05Liq5qih5Zug6YO96JeP5Zyoa2RiYWNl6L+Z5Liq55WM6Z2i6YeM6Z2i5piv5LiT5bGe57yW6K+R5rOV5LiN6KaB5pOF6Ieq56e75Yqo5ZCm5YiZ5qih5Zug55u05o6l5b2x5ZON44CC' },
+    { n: '967sdr', t: '收到，绝不擅自移动。' }
+  ];
+  function renderGroupChat() {
+    const box = document.getElementById('groupChatBox');
+    box.innerHTML = GROUP_MSGS.map(m =>
+      '<div class="msg them">' +
+      '<span class="mu">' + escapeHtml(m.n) + '</span>' + escapeHtml(m.t) +
+      '</div>').join('');
+    box.scrollTop = box.scrollHeight;
+  }
+  function sendGroupChat() {
+    const inp = document.getElementById('groupChatInput');
+    const v = inp.value.trim();
+    if (!v) return;
+    const box = document.getElementById('groupChatBox');
+    const div = document.createElement('div');
+    div.className = 'msg me';
+    div.innerHTML = '<span class="mu">967sdr</span>' + escapeHtml(v);
+    box.appendChild(div);
+    inp.value = '';
+    box.scrollTop = box.scrollHeight;
+  }
+  document.getElementById('capAnswer').addEventListener('input', updateLoginBtn);
+
+  renderHotList();
+  window.addEventListener('hashchange', render);
+  render();
+</script>
